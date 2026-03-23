@@ -9,7 +9,7 @@ namespace library.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
         {
-            //Database.Migrate();
+            //Database.Migrate();//
         }
 
         public DbSet<ElectronicAudioBook> ElectronicAudioBooks { get; set; }
