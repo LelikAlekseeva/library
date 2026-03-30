@@ -1,0 +1,49 @@
+﻿@page
+@model library.Pages.ElectronicAudioBook.CreateModel
+
+        @{
+        ViewData["Title"] = "Create";
+        }
+        
+        <h1>Create</h1>
+        
+    <h4>ElectronicAudioBook</h4>
+    <hr />
+    <div class="row">
+    <div class="col-md-4">
+    <form method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ElectronicAudioBook.Title" class="control-label"></label>
+                <input asp-for="ElectronicAudioBook.Title" class="form-control" />
+                <span asp-validation-for="ElectronicAudioBook.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ElectronicAudioBook.Language" class="control-label"></label>
+                <input asp-for="ElectronicAudioBook.Language" class="form-control" />
+                <span asp-validation-for="ElectronicAudioBook.Language" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ElectronicAudioBook.Genre" class="control-label"></label>
+                <input asp-for="ElectronicAudioBook.Genre" class="form-control" />
+                <span asp-validation-for="ElectronicAudioBook.Genre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ElectronicAudioBook.Name" class="control-label"></label>
+                <input asp-for="ElectronicAudioBook.Name" class="form-control" />
+                <span asp-validation-for="ElectronicAudioBook.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
