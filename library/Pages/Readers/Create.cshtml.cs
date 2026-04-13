@@ -17,14 +17,14 @@ namespace library.Pages.Readers
         }
 
         [BindProperty]
-        public library.Models.Readers Readers { get; set; }
+        public library.Models.Readers Reader { get; set; }
         public void OnGet() { }
         public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
                 return Page();
 
-            _context.Readers.Add(Readers);
+            _context.Readers.Add(Reader);
             _context.SaveChanges();
 
             return RedirectToPage("Index");
