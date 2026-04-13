@@ -1,0 +1,68 @@
+﻿@page
+@model library.Pages.ElectronicAudioBook.CreateModel
+@{
+	ViewData["Title"] = "Добавить книгу";
+}
+<div class="container mt-4">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-sm">
+
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Добавить книгу</h4>
+                </div>
+
+                <div class="card-body">
+
+                    <form method="post">
+
+                        <div class="mb-3">
+                            <label asp-for="ElectronicAudioBook.Title" class="form-label">Название</label>
+                            <input asp-for="ElectronicAudioBook.Title" class="form-control" />
+                            <span asp-validation-for="ElectronicAudioBook.Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ElectronicAudioBook.Author" class="form-label">Автор</label>
+                            <input asp-for="ElectronicAudioBook.Author" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ElectronicAudioBook.Language" class="form-label">Язык</label>
+                            <input asp-for="ElectronicAudioBook.Language" type="text" class=" form-control" />
+                            <span asp-validation-for="ElectronicAudioBook.Language" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ElectronicAudioBook.Genre" class="form-label">Жанр</label>
+                            <input asp-for="ElectronicAudioBook.Genre" type="text" class="form-control" />
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+
+                            <a asp-page="Index" class="btn btn-secondary">
+                                Назад
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                Сохранить
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
