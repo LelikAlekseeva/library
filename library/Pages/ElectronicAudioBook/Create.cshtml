@@ -19,14 +19,14 @@
                     <form method="post">
 
                         <div class="mb-3">
-                            <label asp-for="ElectronicAudioBook.Title" class="form-label">Название</label>
-                            <input asp-for="ElectronicAudioBook.Title" class="form-control" />
-                            <span asp-validation-for="ElectronicAudioBook.Title" class="text-danger"></span>
+                            <label asp-for="ElectronicAudioBook.Name" class="form-label">Название</label>
+                            <input asp-for="ElectronicAudioBook.Name" class="form-control" />
+                            <span asp-validation-for="ElectronicAudioBook.Name" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="ElectronicAudioBook.Author" class="form-label">Автор</label>
-                            <input asp-for="ElectronicAudioBook.Author" class="form-control" />
+                            <input asp-for="ElectronicAudioBook.Author.Name" class="form-control" />
                         </div>
 
                         <div class="mb-3">

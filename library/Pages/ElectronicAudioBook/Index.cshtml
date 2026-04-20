@@ -10,7 +10,7 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Список книг</h2>
         <a asp-page="Create" class="btn btn-success">
-            Добавить новую книгу
+            Добавить новую  аудио книгу
         </a>
     </div>
 
@@ -37,12 +37,12 @@
 
                         <!-- Год публикации -->
                         <p class="card-text mb-1">
-                            Год: <span class="badge bg-secondary">@book.Language</span>
+                            Язык: <span class="badge bg-secondary">@book.Language</span>
                         </p>
 
                         <!-- Количество экземпляров -->
-                        <p class="card-text mb-2">
-                            Кол-во: <span class="badge bg-info">@book.Genre</span>
+                        <p class="card-text-muted mb-2">
+                            Жанр: <span class="badge bg-info">@book.Genre</span>
                         </p>
 
                         <!-- Кнопки действий -->
