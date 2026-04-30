@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestLibraryProject.UnitTests.Model
 {
-    internal class BookTests
+    public class BookTests
     {
 
     }
