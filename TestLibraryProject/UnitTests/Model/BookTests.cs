@@ -8,5 +8,6 @@ namespace TestLibraryProject.UnitTests.Model
 {
     internal class BookTests
     {
+
     }
 }
