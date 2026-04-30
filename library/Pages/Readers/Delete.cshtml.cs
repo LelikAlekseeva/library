@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using library.Data;
 using library.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace library.Pages.ElectronicAudioBook
+
+namespace library.Pages.Readers
 {
     public class DeleteModel : PageModel
     {
@@ -17,16 +17,13 @@ namespace library.Pages.ElectronicAudioBook
         }
 
         [BindProperty]
-        public library.Models.ElectronicAudioBook? ElectronicAudioBook { get; set; }
+        public library.Models.Readers Readers { get; set; }
 
         public IActionResult OnGet(int id)
         {
-            ElectronicAudioBook = _context.ElectronicAudioBook
-                        .Where(c => c.Id == id)
-                        .Include(b => b.Author)
-                        .FirstOrDefault();
+            Readers = _context.Readers.Find(id);
 
-            if (ElectronicAudioBook == null)
+            if (Readers == null)
                 return NotFound();
 
             return Page();
@@ -34,11 +31,11 @@ namespace library.Pages.ElectronicAudioBook
 
         public IActionResult OnPost()
         {
-            var book = _context.ElectronicAudioBook.Find(ElectronicAudioBook.Id);
+            var student = _context.Readers.Find(Readers.Id);
 
-            if (book != null)
+            if (student != null)
             {
-                _context.ElectronicAudioBook.Remove(book);
+                _context.Readers.Remove(student);
                 _context.SaveChanges();
             }
 

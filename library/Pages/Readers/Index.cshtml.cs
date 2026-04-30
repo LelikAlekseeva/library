@@ -12,11 +12,10 @@ namespace library.Pages.Readers
             _context = context;
         }
 
-        public List<Readers> Students { get; set; }
-
+        public List<library.Models.Readers> Readers { get; set; }
         public void OnGet()
         {
-            Students = _context.Readers.ToList();
+            Readers = _context.Readers.ToList();
         }
     }
 }

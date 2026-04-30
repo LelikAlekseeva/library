@@ -1,77 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using library.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 using library.Data;
 using library.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace library.Pages.ElectronicAudioBook
 {
     public class EditModel : PageModel
     {
-        private readonly library.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
+        //private readonly IHubContext<BookHub> _hubContext;
 
-        public EditModel(library.Data.ApplicationDbContext context)
-        {
-            _context = context;
-        }
+       // public EditModel(ApplicationDbContext context, IHubContext<BookHub> hubContext)
+       // {
+         //   _context = context;
+         //   _hubContext = hubContext;
+       // }
 
         [BindProperty]
-        public library.Models.ElectronicAudioBook ElectronicAudioBook { get; set; } = default!;
+        public library.Models.ElectronicAudioBook? ElectronicAudioBook { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public IActionResult OnGet(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            ElectronicAudioBook = _context.ElectronicAudioBook
+                        .Where(c => c.Id == id)
+                        .Include(b => b.Author)
+                        .FirstOrDefault();
 
-            var electronicaudiobook =  await _context.ElectronicAudioBooks.FirstOrDefaultAsync(m => m.Id == id);
-            if (electronicaudiobook == null)
-            {
+            if (ElectronicAudioBook == null)
                 return NotFound();
-            }
-            ElectronicAudioBook = electronicaudiobook;
+
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public IActionResult OnPost()
         {
             if (!ModelState.IsValid)
-            {
                 return Page();
-            }
 
-            _context.Attach(ElectronicAudioBook).State = EntityState.Modified;
+            _context.ElectronicAudioBook.Update(ElectronicAudioBook);
+            _context.SaveChanges();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ElectronicAudioBookExists(ElectronicAudioBook.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            // Отправляем обновление всем клиентам
+            //_hubContext.Clients.All.SendAsync("BookUpdated", Book);
 
-            return RedirectToPage("./Index");
-        }
-
-        private bool ElectronicAudioBookExists(int id)
-        {
-            return _context.ElectronicAudioBooks.Any(e => e.Id == id);
+            return RedirectToPage("Index");
         }
     }
 }

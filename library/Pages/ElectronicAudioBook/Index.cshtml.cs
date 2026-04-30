@@ -1,29 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using library.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using library.Data;
 using library.Models;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace library.Pages.ElectronicAudioBook
 {
     public class IndexModel : PageModel
     {
-        private readonly library.Data.ApplicationDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public IndexModel(library.Data.ApplicationDbContext context)
+        public IndexModel(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        public IList<library.Models.ElectronicAudioBook> ElectronicAudioBook { get;set; } = default!;
+        public List<library.Models.ElectronicAudioBook> ElectronicAudioBook { get; set; }
 
-        public async Task OnGetAsync()
+        public void OnGet()
         {
-            ElectronicAudioBook = await _context.ElectronicAudioBooks.ToListAsync();
+            ElectronicAudioBook = _context.ElectronicAudioBook
+                .Include(b => b.Author)
+                .ToList();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace library.Data
             //Database.Migrate();//
         }
 
-        public DbSet<ElectronicAudioBook> ElectronicAudioBooks { get; set; }
+        public DbSet<ElectronicAudioBook> ElectronicAudioBook { get; set; }
         public DbSet<Readers> Readers { get; set; }
         public DbSet<Author> Authors { get; set; }
     }

@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using library.Data;
 using library.Models;
-using Microsoft.EntityFrameworkCore;
 
 
-namespace library.Pages.ElectronicAudioBook
+namespace library.Pages.Readers
 {
     public class DetailsModel : PageModel
     {
@@ -17,16 +16,13 @@ namespace library.Pages.ElectronicAudioBook
             _context = context;
         }
 
-        public library.Models.ElectronicAudioBook? ElectronicAudioBook { get; set; }
+        public library.Models.Readers Readers { get; set; }
 
         public IActionResult OnGet(int id)
         {
-            ElectronicAudioBook = _context.ElectronicAudioBook
-                        .Where(c => c.Id == id)
-                        .Include(b => b.Author)
-                        .FirstOrDefault();
+            Readers = _context.Readers.FirstOrDefault(s => s.Id == id);
 
-            if (ElectronicAudioBook == null)
+            if (Readers == null)
                 return NotFound();
 
             return Page();
