@@ -1,23 +1,22 @@
-﻿using library.Hubs;
-using library.Models;
+﻿using library.Models;
 using Microsoft.AspNetCore.SignalR;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using library.Hubs;
+using Moq;
 
-namespace Test_Kinoteatr_Web.Hubs
+namespace LibraryTESTo.Hubs
 {
-    public class TicketHubTests
+    public class BookHubTests
     {
         [Fact]
         public async Task SendTicketUpdate_ShouldSendMessageToAllClients()
         {
             // Arrange
-            var hub = new TicketHub();
+            var hub = new BookHub();
 
             var clientsMock = new Mock<IHubCallerClients>();
             var clientProxyMock = new Mock<IClientProxy>();
@@ -26,21 +25,21 @@ namespace Test_Kinoteatr_Web.Hubs
 
             hub.Clients = clientsMock.Object;
 
-            var ticket = new Ticket
+            var E_Book = new E_Book
             {
                 Title = "Test Book",
-                Date = DateTime.Now.AddDays(30),
-                Summa = 1500
+                Language = "Английский",
+                Genre = "Комедия"
             };
 
             // Act
-            await hub.SendTicketUpdate(ticket);
+            await hub.SendTicketUpdate(E_Book);
 
             // Assert
             clientProxyMock.Verify(
                 c => c.SendCoreAsync(
-                    "TicketUpdated",
-                    It.Is<object[]>(o => o.Length == 1 && o[0] == ticket),
+                    "E_bookUpdated",
+                    It.Is<object[]>(o => o.Length == 1 && o[0] == E_Book),
                     default
                 ),
                   Times.Once
