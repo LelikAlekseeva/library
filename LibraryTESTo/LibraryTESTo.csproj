@@ -49,9 +49,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Hubs\BookHubTests.cs" />
+    <Compile Include="UnitTests\Hubs\BookHubTests.cs" />
     <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnitTests\Models\EBookTests.cs" />
+    <Compile Include="UnitTests\Pages\EBook\CreateModelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

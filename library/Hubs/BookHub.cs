@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.SignalR;
 using library.Models;
 
-namespace StudentLibrary2.Hubs
+namespace library.Hubs
 {
     public class BookHub : Hub
     {
