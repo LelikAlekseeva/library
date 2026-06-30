@@ -1,52 +1,105 @@
 using library.Data;
+using library.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.SignalR;
-using library.Data;
-using library.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
-namespace library.Pages.ElectronicAudioBook
+namespace library.Pages.ElectronicAudioBooks  // Изменил на ElectronicAudioBooks (с 's')
 {
     public class EditModel : PageModel
     {
         private readonly ApplicationDbContext _context;
-        //private readonly IHubContext<BookHub> _hubContext;
 
-       // public EditModel(ApplicationDbContext context, IHubContext<BookHub> hubContext)
-       // {
-         //   _context = context;
-         //   _hubContext = hubContext;
-       // }
+        public EditModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
         [BindProperty]
-        public library.Models.ElectronicAudioBook? ElectronicAudioBook { get; set; }
+        public library.Models.ElectronicAudioBook ElectronicAudioBook { get; set; } = new();
 
-        public IActionResult OnGet(int id)
+        public SelectList? Authors { get; set; }
+
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            ElectronicAudioBook = _context.ElectronicAudioBook
-                        .Where(c => c.Id == id)
-                        .Include(b => b.Author)
-                        .FirstOrDefault();
+            // Загружаем книгу вместе с автором
+            ElectronicAudioBook = await _context.ElectronicAudioBook
+                .Where(c => c.Id == id)
+                .Include(b => b.Author)
+                .FirstOrDefaultAsync();
 
             if (ElectronicAudioBook == null)
                 return NotFound();
 
+            // Загружаем список авторов для выпадающего списка
+            await LoadAuthorsAsync();
+
             return Page();
         }
 
-        public IActionResult OnPost()
+        private async Task LoadAuthorsAsync()
+        {
+            var authors = await _context.Authors.ToListAsync();
+            Authors = new SelectList(authors, "Id", "Name", ElectronicAudioBook?.AuthorID);
+        }
+
+        public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
+            {
+                await LoadAuthorsAsync();
                 return Page();
+            }
 
-            _context.ElectronicAudioBook.Update(ElectronicAudioBook);
-            _context.SaveChanges();
+            try
+            {
+                // Проверяем, существует ли автор
+                var author = await _context.Authors.FindAsync(ElectronicAudioBook.AuthorID);
+                if (author == null)
+                {
+                    ModelState.AddModelError("ElectronicAudioBook.AuthorID", "Выбранный автор не существует");
+                    await LoadAuthorsAsync();
+                    return Page();
+                }
 
-            // Отправляем обновление всем клиентам
-            //_hubContext.Clients.All.SendAsync("BookUpdated", Book);
+                // Находим книгу в базе данных
+                var bookToUpdate = await _context.ElectronicAudioBook
+                    .FirstOrDefaultAsync(b => b.Id == ElectronicAudioBook.Id);
 
-            return RedirectToPage("Index");
+                if (bookToUpdate == null)
+                {
+                    return NotFound();
+                }
+
+                // Обновляем только нужные поля (безопасное обновление)
+                bookToUpdate.Name = ElectronicAudioBook.Name;
+                bookToUpdate.Title = ElectronicAudioBook.Title;
+                bookToUpdate.AuthorID = ElectronicAudioBook.AuthorID;
+                bookToUpdate.Language = ElectronicAudioBook.Language;
+                bookToUpdate.Genre = ElectronicAudioBook.Genre;
+
+                // Сохраняем изменения
+                await _context.SaveChangesAsync();
+
+                return RedirectToPage("./Index");
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await ElectronicAudioBookExists(ElectronicAudioBook.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        private async Task<bool> ElectronicAudioBookExists(int id)
+        {
+            return await _context.ElectronicAudioBook.AnyAsync(e => e.Id == id);
         }
     }
 }

@@ -1,67 +1,108 @@
-﻿@page "{id:int}"
-@model library.Pages.ElectronicAudioBook.EditModel
-@{
-	ViewData["Title"] = "Редактировать книгу";
-}
+﻿using library.Data;
+using library.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-<div class="container mt-4">
+// ВАЖНО: используйте правильное пространство имен - ElectronicAudioBooks (с 's')
+namespace library.Pages.ElectronicAudioBooks
+{
+    public class EditModel : PageModel
+    {
+        private readonly ApplicationDbContext _context;
 
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
+        public EditModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-            <div class="card shadow-sm">
+        [BindProperty]
+        public ElectronicAudioBook ElectronicAudioBook { get; set; } = new();
 
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0">Редактировать книгу</h4>
-                </div>
+        public SelectList? Authors { get; set; }
 
-                <div class="card-body">
+        public async Task<IActionResult>
+    OnGetAsync(int id)
+    {
+    // Загружаем книгу вместе с автором
+    ElectronicAudioBook = await _context.ElectronicAudioBook
+    .Where(c => c.Id == id)
+    .Include(b => b.Author)
+    .FirstOrDefaultAsync();
 
-                    <form method="post">
+    if (ElectronicAudioBook == null)
+    return NotFound();
 
-                        <input type="hidden" asp-for="ElectronicAudioBook.Id" />
+    // Загружаем список авторов
+    await LoadAuthorsAsync();
 
-                        <div class="mb-3">
-                            <label asp-for="ElectronicAudioBook.Title" class="form-label">Название</label>
-                            <input asp-for="ElectronicAudioBook.Title" class="form-control" />
-                            <span asp-validation-for="ElectronicAudioBook.Title" class="text-danger"></span>
-                        </div>
+    return Page();
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="ElectronicAudioBook.Author" class="form-label">Автор</label>
-                            <input asp-for="ElectronicAudioBook.Author.Name" class="form-control" />
-                        </div>
+    private async Task LoadAuthorsAsync()
+    {
+    var authors = await _context.Authors.ToListAsync();
+    Authors = new SelectList(authors, "Id", "Name", ElectronicAudioBook?.AuthorID);
+    }
 
-                        <div class="mb-3">
-                            <label asp-for="ElectronicAudioBook.Language" class="form-label">Год</label>
-                            <input asp-for="ElectronicAudioBook.Language" type="number" class="form-control" />
-                        </div>
+    public async Task<IActionResult>
+        OnPostAsync()
+        {
+        if (!ModelState.IsValid)
+        {
+        await LoadAuthorsAsync();
+        return Page();
+        }
 
-                        <div class="mb-3">
-                            <label asp-for="ElectronicAudioBook.Genre" class="form-label">Количество</label>
-                            <input asp-for="ElectronicAudioBook.Genre" type="number" class="form-control" />
-                        </div>
+        try
+        {
+        // Проверяем существование автора
+        var author = await _context.Authors.FindAsync(ElectronicAudioBook.AuthorID);
+        if (author == null)
+        {
+        ModelState.AddModelError("ElectronicAudioBook.AuthorID", "Выбранный автор не существует");
+        await LoadAuthorsAsync();
+        return Page();
+        }
 
-                        <div class="d-flex justify-content-between">
-                            <a asp-page="Index" class="btn btn-secondary">
-                                Назад
-                            </a>
-                            <button type="submit" class="btn btn-warning">
-                                Сохранить
-                            </button>
-                        </div>
+        // Находим книгу в БД
+        var bookToUpdate = await _context.ElectronicAudioBook
+        .FirstOrDefaultAsync(b => b.Id == ElectronicAudioBook.Id);
 
-                    </form>
+        if (bookToUpdate == null)
+        {
+        return NotFound();
+        }
 
-                </div>
+        // Обновляем поля
+        bookToUpdate.Name = ElectronicAudioBook.Name;
+        bookToUpdate.Title = ElectronicAudioBook.Title;
+        bookToUpdate.AuthorID = ElectronicAudioBook.AuthorID;
+        bookToUpdate.Language = ElectronicAudioBook.Language;
+        bookToUpdate.Genre = ElectronicAudioBook.Genre;
 
-            </div>
+        await _context.SaveChangesAsync();
 
-        </div>
-    </div>
+        return RedirectToPage("./Index");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+        if (!await ElectronicAudioBookExists(ElectronicAudioBook.Id))
+        {
+        return NotFound();
+        }
+        else
+        {
+        throw;
+        }
+        }
+        }
 
-</div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}   
+        private async Task<bool>
+            ElectronicAudioBookExists(int id)
+            {
+            return await _context.ElectronicAudioBook.AnyAsync(e => e.Id == id);
+            }
+            }
+            }

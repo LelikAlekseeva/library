@@ -1,12 +1,5 @@
-﻿using library.Migrations;
-using library.Models;
-using library.Models;
-using System;
-using System.Collections.Generic;
+﻿using library.Models;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace library.Tests.UnitTests.Model
 {
@@ -15,40 +8,50 @@ namespace library.Tests.UnitTests.Model
         [Fact]
         public void Book_WithValidData_ShouldBeValid()
         {
-            // Создаем объект книги с валидными значениями.
-            var book = new ElectronicAudioBook
+            // Arrange
+            var author = new Author
             {
-                Name = "C# in Depth",     // Обязательное поле, строка < 100 символов
-                Author = new Author { Name = "Пушкин" },      // Обязательное поле, строка < 100 символов
-                Genre = "Научный", 
+                Name = "Пушкин"
             };
 
-            // Создаем контекст валидации на основе объекта
-            var context = new ValidationContext(book);
+            var book = new ElectronicAudioBook
+            {
+                Name = "C# in Depth",     // Обязательное поле из EFModel
+                Title = "Подробное руководство",
+                Author = author,
+                AuthorID = author.Id,
+                Language = "Русский",
+                Genre = "Научный"
+            };
 
-            // Сюда будут записаны ошибки валидации, если они есть
+            var context = new ValidationContext(book);
             var result = new List<ValidationResult>();
 
-            // Проводим валидацию объекта с учетом всех атрибутов [Required], [Range] и т.п.
+            // Act
             var isValid = Validator.TryValidateObject(book, context, result, true);
 
-            // Ожидаем, что валидация прошла успешно (все поля корректны)
+            // Assert
             Assert.True(isValid);
-
-            // Также убеждаемся, что список ошибок пуст
             Assert.Empty(result);
         }
 
-        // Тест проверяет, что если не указать заголовок, то объект будет невалиден.
         [Fact]
-        public void Book_WithInvalidYear_ShouldBeInvalid()
+        public void Book_WithEmptyName_ShouldBeInvalid()
         {
             // Arrange
+            var author = new Author
+            {
+                Name = "Пушкин"
+            };
+
             var book = new ElectronicAudioBook
             {
-                Title = "Test Book",
-                Author = new Author { Name = "Пушкин" },
-                Genre = "Драма" // ❗ теперь это действительно ошибка
+                Name = "", // Пустое имя - должно вызвать ошибку валидации
+                Title = "Подробное руководство",
+                Author = author,
+                AuthorID = author.Id,
+                Language = "Русский",
+                Genre = "Научный"
             };
 
             var context = new ValidationContext(book);
@@ -59,8 +62,69 @@ namespace library.Tests.UnitTests.Model
 
             // Assert
             Assert.False(isValid);
-            Assert.Contains(results, r => r.ErrorMessage.Contains("Год должен быть"));
+            Assert.Contains(results, r => r.ErrorMessage.Contains("Наименование должно быть заполнено"));
+        }
+
+        [Fact]
+        public void Book_WithNullName_ShouldBeInvalid()
+        {
+            // Arrange
+            var author = new Author
+            {
+                Name = "Пушкин"
+            };
+
+            var book = new ElectronicAudioBook
+            {
+                Name = null, // Null имя - должно вызвать ошибку валидации
+                Title = "Подробное руководство",
+                Author = author,
+                AuthorID = author.Id,
+                Language = "Русский",
+                Genre = "Научный"
+            };
+
+            var context = new ValidationContext(book);
+            var results = new List<ValidationResult>();
+
+            // Act
+            var isValid = Validator.TryValidateObject(book, context, results, true);
+
+            // Assert
+            Assert.False(isValid);
+            Assert.Contains(results, r => r.ErrorMessage.Contains("Наименование должно быть заполнено"));
+        }
+
+        [Fact]
+        public void Book_ShouldHaveAuthorNavigationProperty()
+        {
+            // Arrange
+            var author = new Author
+            {
+                Name = "Толстой"
+            };
+
+            var book = new ElectronicAudioBook
+            {
+                Name = "Война и мир",
+                Author = author,
+                AuthorID = author.Id
+            };
+
+            // Assert
+            Assert.NotNull(book.Author);
+            Assert.Equal("Толстой", book.Author.Name);
+            Assert.Equal(author.Id, book.AuthorID);
+        }
+
+        [Fact]
+        public void Book_ShouldInheritFromEFModel()
+        {
+            // Arrange
+            var book = new ElectronicAudioBook();
+
+            // Assert
+            Assert.IsAssignableFrom<EFModel>(book);
         }
     }
 }
-
