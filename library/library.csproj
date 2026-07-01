@@ -1,29 +1,108 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+using library.Data;
+using library.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+// ВАЖНО: используйте правильное пространство имен - ElectronicAudioBooks (с 's')
+namespace library.Pages.ElectronicAudioBooks
+{
+    public class EditModel : PageModel
+    {
+        private readonly ApplicationDbContext _context;
 
-  <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="FluentAssertions" Version="8.9.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.9" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.13">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.13">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Moq" Version="4.20.72" />
-  </ItemGroup>
+        public EditModel(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-</Project>
+        [BindProperty]
+        public ElectronicAudioBook ElectronicAudioBook { get; set; } = new();
+
+        public SelectList? Authors { get; set; }
+
+        public async Task<IActionResult>
+    OnGetAsync(int id)
+    {
+    // Загружаем книгу вместе с автором
+    ElectronicAudioBook = await _context.ElectronicAudioBook
+    .Where(c => c.Id == id)
+    .Include(b => b.Author)
+    .FirstOrDefaultAsync();
+
+    if (ElectronicAudioBook == null)
+    return NotFound();
+
+    // Загружаем список авторов
+    await LoadAuthorsAsync();
+
+    return Page();
+    }
+
+    private async Task LoadAuthorsAsync()
+    {
+    var authors = await _context.Authors.ToListAsync();
+    Authors = new SelectList(authors, "Id", "Name", ElectronicAudioBook?.AuthorID);
+    }
+
+    public async Task<IActionResult>
+        OnPostAsync()
+        {
+        if (!ModelState.IsValid)
+        {
+        await LoadAuthorsAsync();
+        return Page();
+        }
+
+        try
+        {
+        // Проверяем существование автора
+        var author = await _context.Authors.FindAsync(ElectronicAudioBook.AuthorID);
+        if (author == null)
+        {
+        ModelState.AddModelError("ElectronicAudioBook.AuthorID", "Выбранный автор не существует");
+        await LoadAuthorsAsync();
+        return Page();
+        }
+
+        // Находим книгу в БД
+        var bookToUpdate = await _context.ElectronicAudioBook
+        .FirstOrDefaultAsync(b => b.Id == ElectronicAudioBook.Id);
+
+        if (bookToUpdate == null)
+        {
+        return NotFound();
+        }
+
+        // Обновляем поля
+        bookToUpdate.Name = ElectronicAudioBook.Name;
+        bookToUpdate.Title = ElectronicAudioBook.Title;
+        bookToUpdate.AuthorID = ElectronicAudioBook.AuthorID;
+        bookToUpdate.Language = ElectronicAudioBook.Language;
+        bookToUpdate.Genre = ElectronicAudioBook.Genre;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToPage("./Index");
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+        if (!await ElectronicAudioBookExists(ElectronicAudioBook.Id))
+        {
+        return NotFound();
+        }
+        else
+        {
+        throw;
+        }
+        }
+        }
+
+        private async Task<bool>
+            ElectronicAudioBookExists(int id)
+            {
+            return await _context.ElectronicAudioBook.AnyAsync(e => e.Id == id);
+            }
+            }
+            }
